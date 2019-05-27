@@ -58,21 +58,23 @@ typedef struct objc_super2     objc_super2;
 
 typedef id (*IMP)(id, SEL, ...);
 
-//------------------------------------------------------------------------------
-/*  Example:
-        oc_framework(Foundation)
+/*------------------------------------------------------------------------------
+oc_framework(FRAMEWORK) - load an Objective-C framework
+oc_import(FRAMEWORK, SYMBOLS...) - import symbols froma framework
+
+Usage:
+
+    oc_framework(Foundation)
+    oc_import(
+        Foundation,
+        function(void,objc_release,(void*)),
+        function(void,objc_retain,(void*)),
+    )
+
 */
 #define oc_framework(FRAMEWORK) _oc_framework(FRAMEWORK)
 #include "detail/framework.h"
 
-//------------------------------------------------------------------------------
-/*  Example:
-        oc_import(
-            Foundation,
-            function(void,objc_release,(void*)),
-            function(void,objc_retain,(void*)),
-        )
-*/
 #define oc_import(FRAMEWORK, /*SYMBOLS*/...) _oc_import(FRAMEWORK, __VA_ARGS__)
 #include "detail/import.h"
 
@@ -148,26 +150,30 @@ oc_import(
 
 #endif
 
-//------------------------------------------------------------------------------
-
-#include "detail/message.h"
-#define oc_cls(CLASS, /*PARAMS*/...)\
-        _oc_msg_send(CLASS##_class, CLASS, __VA_ARGS__)
-
-#define oc_obj(SELF, CLASS, /*PARAMS*/...)\
-        _oc_msg_send(SELF, CLASS, __VA_ARGS__)
-
-#define oc_super(CLASS, /*PARAMS*/...)\
-        _oc_msg_send_super(CLASS, __VA_ARGS__)
-
-//------------------------------------------------------------------------------
-
+/*------------------------------------------------------------------------------
+oc_class(NAME) - forward declare an Objective-C class
+*/
 #define oc_class(NAME) typedef struct NAME NAME;
 
 oc_class(NSObject)
 
-//------------------------------------------------------------------------------
+/*------------------------------------------------------------------------------
+oc_interface(CLASS, SYMBOLS...) - declare an Objective-C class interface
 
+Usage:
+
+    oc_interface(
+        NSDate,
+        cls(NSDate*, date),
+        cls(NSDate*, dateWithTimeIntervalSinceNow,NSTimeInterval),
+        cls(NSDate*, dateWithTimeInterval,NSTimeInterval,sinceDate,NSDate*),
+        cls(NSDate*, distantPast),
+        cls(NSDate*, distantFuture),
+        obj(NSDate*, initWithTimeInterval,NSTimeInterval,sinceDate,NSDate*),
+    )
+
+*/
+#include "detail/message.h"
 #include "detail/interface.h"
 #define oc_interface(CLASS, /*SYMBOLS*/...)\
         _oc_interface(CLASS, __VA_ARGS__)
@@ -176,47 +182,125 @@ oc_interface(
     NSObject,
 )
 
-//------------------------------------------------------------------------------
+/*------------------------------------------------------------------------------
+oc_implementation(CLASS, SUPERCLASS, SYMBOLS...) - define an Objective-C class
+oc_method(RESULT, CLASS, PARAMS...) - define a class method implementation
 
+Usage:
+
+    oc_interface(
+        AppDelegate,
+    )
+
+    oc_implementation(
+        AppDelegate, NSObject,
+        obj(NSApplicationTerminateReply,
+            applicationShouldTerminate,NSApplication*),
+    )
+
+    oc_method(
+        NSApplicationTerminateReply,
+        AppDelegate,
+        applicationShouldTerminate,NSApplication*
+    ) {
+        puts(__func__);
+        appQuit();
+        return NSApplicationTerminateCancel;
+    }
+
+*/
 #include "detail/implementation.h"
 #define oc_implementation(CLASS, SUPERCLASS, /*SYMBOLS*/...)\
         _oc_implementation(CLASS, SUPERCLASS, __VA_ARGS__)
-/*
-    Example:
-        oc_implementation(
-            AppWindow, NSWindow,
-            var(void*,context),
-            obj(void,dealloc),
-            obj(bool,windowShouldClose,NSNotification*,(
-                return true;
-            )),
-            obj(void,windowWillClose,NSNotification*,(
-                puts(__func__);
-            )),
-        )
-*/
-
-//------------------------------------------------------------------------------
-
-#include "detail/var.h"
-#define oc_var(SELF, CLASS, NAME)\
-        _oc_var(SELF, CLASS, NAME)
-
-//------------------------------------------------------------------------------
 
 #include "detail/method.h"
 #define oc_method(RESULT, CLASS, /*PARAMS*/...)\
         _oc_method(RESULT, CLASS, __VA_ARGS__)
 
-//------------------------------------------------------------------------------
+/*------------------------------------------------------------------------------
+oc_cls(CLASS, PARAMS...) - call an Objective-C class method
 
+Usage:
+
+    NSWindow* const nsWindow = oc_cls(NSWindow,new);
+
+*/
+#define oc_cls(CLASS, /*PARAMS*/...)\
+        _oc_msg_send(CLASS##_class, CLASS, __VA_ARGS__)
+
+/*------------------------------------------------------------------------------
+oc_obj(CLASS, PARAMS...) - call an Objective-C object method
+
+Usage:
+
+    oc_obj(nsWindow,NSWindow,setReleasedWhenClosed,false);
+
+*/
+#define oc_obj(SELF, CLASS, /*PARAMS*/...)\
+        _oc_msg_send(SELF, CLASS, __VA_ARGS__)
+
+/*------------------------------------------------------------------------------
+oc_super(CLASS, PARAMS...) - call an Objective-C super method
+
+Usage:
+
+    oc_method(AppWindow*,AppWindow,alloc) {
+        puts((const char*)cmd);
+        return oc_super(AppWindow,alloc);
+    }
+
+*/
+#define oc_super(CLASS, /*PARAMS*/...)\
+        _oc_msg_send_super(CLASS, __VA_ARGS__)
+
+/*------------------------------------------------------------------------------
+oc_var(SELF, CLASS, NAME) - get/set an Objective-C object member variable
+
+Usage:
+
+    oc_implementation(
+        AppMenuItem, NSMenuItem,
+        var(AppMenuCallback,    callback),
+        cls(NSMenuItem*,        menuItemWithTitle,NSString*,
+                                callback,AppMenuCallback,
+                                keyEquivalent,NSString*),
+        obj(void,               invokeCallback),
+        obj(bool,               validateMenuItem,NSMenuItem*),
+    )
+
+    //...
+
+    oc_var(item,AppMenuItem,callback) = callback;
+
+*/
+#include "detail/var.h"
+#define oc_var(SELF, CLASS, NAME)\
+        _oc_var(SELF, CLASS, NAME)
+
+
+/*------------------------------------------------------------------------------
+oc_cls_swizzle(RESULT, CLASS, PARAMS...) - replace class method implementation
+oc_obj_swizzle(RESULT, CLASS, PARAMS...) - replace object method implementation
+
+Usage:
+
+    oc_cls_swizzle(id, NSObject, alloc) {
+        printf("%s.%s\n", class_getName(self), (const char*)cmd);
+        return imp(self, cmd);
+    }
+
+    oc_obj_swizzle(void, NSObject, dealloc) {
+        printf("%s.%s\n", class_getName(object_getClass(self)), (const char*)cmd);
+        imp(self, cmd);
+    }
+
+*/
 #include "detail/swizzle.h"
 #define oc_cls_swizzle(RESULT, CLASS, /*PARAMS*/...)\
         _oc_msg_swizzle(RESULT, CLASS, Class, ClassMethod, __VA_ARGS__)
 
 #define oc_obj_swizzle(RESULT, CLASS, /*PARAMS*/...)\
         _oc_msg_swizzle(RESULT, CLASS, CLASS*, InstanceMethod, __VA_ARGS__)
-
 
 //------------------------------------------------------------------------------
 
