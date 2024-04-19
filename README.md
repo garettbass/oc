@@ -51,7 +51,7 @@ oc_method(
     applicationShouldTerminate,NSApplication*
 ) {
     puts(__func__);
-    appQuit();
+    app_quit();
     return NSApplicationTerminateCancel;
 }
 
@@ -61,6 +61,6 @@ oc_method(
     applicationWillTerminate,NSNotification*
 ) {
     puts(__func__);
-    appQuit();
+    app_quit();
 }
 ```

@@ -1,15 +1,17 @@
 #pragma once
-#include "oc.h"
+#include "corefoundation.h"
 
 //------------------------------------------------------------------------------
 
-oc_class(NSArray)
-oc_class(NSAutoreleasePool)
-oc_class(NSBundle)
-oc_class(NSError)
-oc_class(NSMutableArray)
-oc_class(NSNotification)
-oc_class(NSString)
+oc_class(NSArray);
+oc_class(NSAutoreleasePool);
+oc_class(NSBundle);
+oc_class(NSData);
+oc_class(NSDictionary);
+oc_class(NSError);
+oc_class(NSMutableArray);
+oc_class(NSNotification);
+oc_class(NSString);
 
 //------------------------------------------------------------------------------
 
@@ -87,6 +89,25 @@ oc_interface(
     cls(NSBundle*,  mainBundle),
     obj(NSString*,  bundleIdentifier),
     obj(NSString*,  bundlePath),
+)
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+oc_interface(
+    NSData,
+    obj(const void*, bytes),
+)
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+oc_interface(
+    NSDictionary,
+    cls(NSDictionary*,
+        dictionaryWithObjects,id*, 
+        forKeys,NSString*,
+        count,NSUInteger),
+    obj(NSUInteger, count),
+    obj(id,valueForKey,NSString*),
 )
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

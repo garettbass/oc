@@ -3,7 +3,7 @@
 
 //------------------------------------------------------------------------------
 
-typedef void* (*_oc_msg_swizzle_imp)(IMP, void*, SEL, ...);
+typedef void* (*_oc_msg_swizzle_imp)(objc_imp, void*, objc_selector*, ...);
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -53,7 +53,7 @@ typedef void* (*_oc_msg_swizzle_imp)(IMP, void*, SEL, ...);
         static inline RESULT PREFIX##_callback(MSG_SEND_T imp, _oc_unpack(PARAMS));\
         static MSG_SEND_T PREFIX##_imp = NULL;\
         static void* PREFIX##_swizzle_imp PARAMS {\
-            return ((_oc_msg_swizzle_imp)PREFIX##_callback)((IMP)PREFIX##_imp, self, __VA_ARGS__);\
+            return ((_oc_msg_swizzle_imp)PREFIX##_callback)((objc_imp)PREFIX##_imp, self, __VA_ARGS__);\
         }\
         __attribute__((constructor))\
         static inline void\
@@ -62,20 +62,20 @@ typedef void* (*_oc_msg_swizzle_imp)(IMP, void*, SEL, ...);
                 CLASS##_class,\
                 MSG_SEL,\
                 class_get##METHOD_TYPE,\
-                (IMP)PREFIX##_swizzle_imp);\
+                (objc_imp)PREFIX##_swizzle_imp);\
         }\
         _oc_extern_c_end\
         static inline RESULT PREFIX##_callback(MSG_SEND_T imp, _oc_unpack(PARAMS))
 
         _oc_extern_c_begin
-        static inline IMP
+        static inline objc_imp
         __oc_msg_swizzle_initializer(
-            Class cls,
-            SEL const sel,
-            Method (*getMethod)(Class,SEL),
-            IMP const imp
+            objc_class* cls,
+            objc_selector* const sel,
+            objc_method* (*getMethod)(objc_class*,objc_selector*),
+            objc_imp const imp
         ) {
-            Method const method = getMethod(cls, sel);
+            objc_method* const method = getMethod(cls, sel);
             assert(method);
             return method_setImplementation(method, imp);
         }

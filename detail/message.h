@@ -141,14 +141,16 @@
 //------------------------------------------------------------------------------
 
 typedef struct objc_super2 {
-    id    receiver;
-    Class receiver_class;
+    id          receiver;
+    objc_class* receiver_class;
+
     #ifdef __cplusplus
-    objc_super2(id obj, Class obj_class)
-    : receiver(obj)
-    , receiver_class(obj_class) {}
-    operator objc_super2*() { return this; }
+        objc_super2(id obj, objc_class* obj_class)
+        : receiver(obj)
+        , receiver_class(obj_class) {}
+        operator objc_super2*() { return this; }
     #endif
+
 } objc_super2;
 
 #ifdef __cplusplus
@@ -164,18 +166,18 @@ typedef struct objc_super2 {
 
         _oc_extern_c_begin
         static inline id
-        _oc_msg_check(id const self, SEL const sel) {
-            Class cls = object_getClass(self);
-            Method method = class_getInstanceMethod(cls, sel);
+        _oc_msg_check(id const self, objc_selector* const sel) {
+            objc_class* cls = object_getClass(self);
+            objc_method* method = class_getInstanceMethod(cls, sel);
             if (method == NULL) {
                 const char* const classname = class_getName(cls);
                 const char* const methodname = sel_getName(sel);
                 printf("method not found: %s.%s\n", classname, methodname);
                 unsigned methodCount = 0;
-                Method* methodList = class_copyMethodList(cls, &methodCount);
+                objc_method** methodList = class_copyMethodList(cls, &methodCount);
                 printf("candidates: %u\n", methodCount);
-                for (int i = 0; i < methodCount; ++i) {
-                    SEL sel = method_getName(methodList[i]);
+                for (unsigned i = 0; i < methodCount; ++i) {
+                    objc_selector* sel = method_getName(methodList[i]);
                     const char* const methodname = sel_getName(sel);
                     fputs("    ", stdout);
                     fputs(methodname, stdout);
@@ -216,25 +218,25 @@ typedef struct objc_super2 {
         _oc_concat_2(_oc_msg_params_,_oc_va_len(__VA_ARGS__))\
             (TSELF, __VA_ARGS__)
 #define _oc_msg_params_1(TSELF, P1)\
-        (TSELF self, SEL cmd)
+        (TSELF self, objc_selector* cmd)
 #define _oc_msg_params_2(TSELF, P1,T1)\
-        (TSELF self, SEL cmd, T1 P1)
+        (TSELF self, objc_selector* cmd, T1 P1)
 #define _oc_msg_params_4(TSELF, P1,T1, P2,T2)\
-        (TSELF self, SEL cmd, T1 P1, T2 P2)
+        (TSELF self, objc_selector* cmd, T1 P1, T2 P2)
 #define _oc_msg_params_6(TSELF, P1,T1, P2,T2, P3,T3)\
-        (TSELF self, SEL cmd, T1 P1, T2 P2, T3 P3)
+        (TSELF self, objc_selector* cmd, T1 P1, T2 P2, T3 P3)
 #define _oc_msg_params_8(TSELF, P1,T1, P2,T2, P3,T3, P4,T4)\
-        (TSELF self, SEL cmd, T1 P1, T2 P2, T3 P3, T4 P4)
+        (TSELF self, objc_selector* cmd, T1 P1, T2 P2, T3 P3, T4 P4)
 #define _oc_msg_params_10(TSELF, P1,T1, P2,T2, P3,T3, P4,T4, P5,T5)\
-        (TSELF self, SEL cmd, T1 P1, T2 P2, T3 P3, T4 P4, T5 P5)
+        (TSELF self, objc_selector* cmd, T1 P1, T2 P2, T3 P3, T4 P4, T5 P5)
 #define _oc_msg_params_12(TSELF, P1,T1, P2,T2, P3,T3, P4,T4, P5,T5, P6,T6)\
-        (TSELF self, SEL cmd, T1 P1, T2 P2, T3 P3, T4 P4, T5 P5, T6 P6)
+        (TSELF self, objc_selector* cmd, T1 P1, T2 P2, T3 P3, T4 P4, T5 P5, T6 P6)
 #define _oc_msg_params_14(TSELF, P1,T1, P2,T2, P3,T3, P4,T4, P5,T5, P6,T6, P7,T7)\
-        (TSELF self, SEL cmd, T1 P1, T2 P2, T3 P3, T4 P4, T5 P5, T6 P6, T7 P7)
+        (TSELF self, objc_selector* cmd, T1 P1, T2 P2, T3 P3, T4 P4, T5 P5, T6 P6, T7 P7)
 #define _oc_msg_params_16(TSELF, P1,T1, P2,T2, P3,T3, P4,T4, P5,T5, P6,T6, P7,T7, P8,T8)\
-        (TSELF self, SEL cmd, T1 P1, T2 P2, T3 P3, T4 P4, T5 P5, T6 P6, T7 P7, T8 P8)
+        (TSELF self, objc_selector* cmd, T1 P1, T2 P2, T3 P3, T4 P4, T5 P5, T6 P6, T7 P7, T8 P8)
 #define _oc_msg_params_18(TSELF, P1,T1, P2,T2, P3,T3, P4,T4, P5,T5, P6,T6, P7,T7, P8,T8, P9,T9)\
-        (TSELF self, SEL cmd, T1 P1, T2 P2, T3 P3, T4 P4, T5 P5, T6 P6, T7 P7, T8 P8, T9 P9)
+        (TSELF self, objc_selector* cmd, T1 P1, T2 P2, T3 P3, T4 P4, T5 P5, T6 P6, T7 P7, T8 P8, T9 P9)
 
 //------------------------------------------------------------------------------
 
@@ -337,7 +339,7 @@ typedef struct objc_super2 {
 //------------------------------------------------------------------------------
 
 #define _oc_msg_sel_declaration(CLASS, /*PARAMS*/...)\
-        static SEL oc_sel(CLASS, __VA_ARGS__) = NULL;
+        static objc_selector* oc_sel(CLASS, __VA_ARGS__) = NULL;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -351,10 +353,10 @@ typedef struct objc_super2 {
         _oc_extern_c_begin
         static inline void
         __oc_msg_sel_initializer(
-            SEL* const psel,
+            objc_selector** const psel,
             const char name[],
-            Class cls,
-            Method (*getMethod)(Class,SEL)
+            objc_class* cls,
+            objc_method* (*getMethod)(objc_class*,objc_selector*)
         ) {
             assert(*psel == NULL);
             *psel = sel_getUid(name);

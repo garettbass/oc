@@ -42,11 +42,11 @@
         _oc_extern_c_begin
         static inline void
         __oc_var_initializer(
-            size_t* const pvar_offset,
-            const Class   cls,
-            const char    name[],
-            const size_t  size,
-            const size_t  align
+            size_t*     const pvar_offset,
+            objc_class* const cls,
+            const char        name[],
+            const size_t      size,
+            const size_t      align
         ) {
             assert(*pvar_offset == 0);
             const bool added = class_addIvar(cls, name, size, align, "?");

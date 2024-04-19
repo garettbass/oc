@@ -5,7 +5,7 @@
 
 #define _oc_interface(CLASS, /*SYMBOLS*/...)\
         __oc_interface(CLASS,\
-            cls(Class,  class),\
+            cls(objc_class*,  class),\
             cls(CLASS*, new),\
             cls(CLASS*, alloc),\
             obj(void,   dealloc),\
@@ -17,8 +17,8 @@
             obj(size_t, retainCount),\
             __VA_ARGS__)
 #define __oc_interface(CLASS, /*SYMBOLS*/...)\
-        oc_class(CLASS)\
-        static Class CLASS##_class = NULL;\
+        oc_class(CLASS);\
+        static objc_class* CLASS##_class = NULL;\
         _oc_interface_symbol_declarations(CLASS, __VA_ARGS__)\
         _oc_extern_c_begin\
         __attribute__((constructor))\
@@ -31,7 +31,7 @@
 
         _oc_extern_c_begin
         static inline void
-        _oc_interface_initializer(Class* pcls, const char name[]) {
+        _oc_interface_initializer(objc_class** pcls, const char name[]) {
             assert(*pcls == NULL);
             *pcls = objc_getClass(name);
         }
@@ -71,7 +71,7 @@
         ___oc_interface_symbol_declaration_cls(__VA_ARGS__)
 #define ___oc_interface_symbol_declaration_cls(CLASS, RESULT, ...)\
         _oc_msg_sel_declaration(CLASS, __VA_ARGS__)\
-        _oc_msg_declaration(CLASS, RESULT, Class, __VA_ARGS__)
+        _oc_msg_declaration(CLASS, RESULT, objc_class*, __VA_ARGS__)
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

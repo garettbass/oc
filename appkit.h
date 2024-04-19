@@ -1,21 +1,22 @@
 #pragma once
-#include "foundation.h"
+#include "coregraphics.h"
 
 //------------------------------------------------------------------------------
 
 oc_framework(AppKit)
 
-oc_class(NSApplication)
-oc_class(NSCursor)
-oc_class(NSDate)
-oc_class(NSEvent)
-oc_class(NSMenu)
-oc_class(NSMenuItem)
-oc_class(NSNotificationCenter)
-oc_class(NSPersistentUIManager)
-oc_class(NSScreen)
-oc_class(NSView)
-oc_class(NSWindow)
+oc_class(NSApplication);
+oc_class(NSCursor);
+oc_class(NSDate);
+oc_class(NSEvent);
+oc_class(NSGraphicsContext);
+oc_class(NSMenu);
+oc_class(NSMenuItem);
+oc_class(NSNotificationCenter);
+oc_class(NSPersistentUIManager);
+oc_class(NSScreen);
+oc_class(NSView);
+oc_class(NSWindow);
 
 //------------------------------------------------------------------------------
 
@@ -151,6 +152,7 @@ oc_interface(
     obj(void,           setMainMenu,NSMenu*),
     obj(void,           terminate,id),
     obj(void,           updateWindows),
+    obj(NSArray*,       windows),
 )
 
 #define NSApp (oc_cls(NSApplication, sharedApplication))
@@ -233,9 +235,20 @@ oc_interface(
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 oc_interface(
+    NSGraphicsContext,
+    cls(NSGraphicsContext*,graphicsContextWithWindow,NSWindow*),
+    cls(NSGraphicsContext*, currentContext),
+    cls(void,setCurrentContext,NSGraphicsContext*),
+    obj(CGContext*,CGContext),
+)
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+oc_interface(
     NSMenu,
-    obj(NSMenu*, initWithTitle,NSString*),
-    obj(void,    addItem,NSMenuItem*),
+    obj(NSMenu*,   initWithTitle,NSString*),
+    obj(void,      addItem,NSMenuItem*),
+    obj(NSString*, title),
 )
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -243,11 +256,12 @@ oc_interface(
 oc_interface(
     NSMenuItem,
     obj(NSMenuItem*,    initWithTitle,NSString*,
-                        action,SEL,
+                        action,objc_selector*,
                         keyEquivalent,NSString*),
     obj(void,           setKeyEquivalentModifierMask,NSEventModifierFlags),
     obj(void,           setSubmenu,NSMenu*),
     obj(void,           setTarget,id),
+    obj(NSString*,      title),
 )
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -282,6 +296,20 @@ oc_interface(
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 oc_interface(
+    NSView,
+    obj(NSView*,    superview),
+    obj(NSArray*,   subviews),
+    obj(NSRect,     bounds),
+    obj(void,       display),
+    obj(NSRect,     frame),
+    obj(NSWindow*,  window),
+    obj(void,       drawRect,NSRect),
+    obj(void,       removeFromSuperview),
+)
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+oc_interface(
     NSWindow,
     obj(NSWindow*,          initWithContentRect,NSRect,
                             styleMask,NSWindowStyleMask,
@@ -296,6 +324,7 @@ oc_interface(
     obj(void,               disableSnapshotRestoration),
     obj(NSRect,             frame),
     obj(NSRect,             frameRectForContentRect,NSRect),
+    obj(NSGraphicsContext*, graphicsContext),
     obj(bool,               isDocumentEdited),
     obj(bool,               isKeyWindow),
     obj(bool,               isMainWindow),
@@ -315,7 +344,7 @@ oc_interface(
     obj(void,               setDocumentEdited,bool),
     obj(void,               setFrame,NSRect, display,bool),
     obj(void,               setRestorable,bool),
-    obj(void,               setRestorationClass,Class),
+    obj(void,               setRestorationClass,objc_class*),
     obj(void,               setIsVisible,bool),
     obj(void,               setReleasedWhenClosed,bool),
     obj(void,               setStyleMask,NSWindowStyleMask),
@@ -324,18 +353,6 @@ oc_interface(
     obj(NSWindowStyleMask,  styleMask),
     obj(bool,               titlebarAppearsTransparent),
     obj(void,               zoom,id),
-)
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-oc_interface(
-    NSView,
-    obj(NSView*,    superview),
-    obj(NSArray*,   subviews),
-    obj(NSRect,     bounds),
-    obj(NSRect,     frame),
-    obj(NSWindow*,  window),
-    obj(void,       removeFromSuperview),
 )
 
 //------------------------------------------------------------------------------

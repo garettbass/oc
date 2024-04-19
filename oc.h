@@ -48,19 +48,18 @@
 
 //------------------------------------------------------------------------------
 
-typedef struct objc_category   *Category;
-typedef struct objc_class      *Class;
-typedef struct objc_ivar       *Ivar;
-typedef struct objc_method     *Method;
-typedef struct objc_selector   *SEL;
-typedef struct objc_property   *Property;
+typedef struct objc_class      objc_class;
+typedef struct objc_ivar       objc_ivar;
+typedef struct objc_method     objc_method;
+typedef struct objc_selector   objc_selector;
+typedef struct objc_property   objc_property, *Property;
 typedef struct objc_super2     objc_super2;
 
-typedef id (*IMP)(id, SEL, ...);
+typedef id (*objc_imp)(id, objc_selector*, ...);
 
 /*------------------------------------------------------------------------------
 oc_framework(FRAMEWORK) - load an Objective-C framework
-oc_import(FRAMEWORK, SYMBOLS...) - import symbols froma framework
+oc_import(FRAMEWORK, SYMBOLS...) - import symbols from a framework
 
 Usage:
 
@@ -83,79 +82,99 @@ Usage:
 oc_framework(CoreFoundation)
 oc_import(
     CoreFoundation,
-    function(id,          CFRetain,(void*)),
-    function(void,        CFRelease,(const void*)),
-    function(id,          CFAutorelease,(const void*)),
     function(signed long, CFGetRetainCount,(const void*)),
 )
-
-#define oc_retain(obj)      (CFRetain(obj))
-#define oc_release(obj)     (CFRelease(obj))
-#define oc_autorelease(obj) (CFAutorelease(obj))
-#define oc_retaincount(obj) (CFGetRetainCount(obj))
 
 //------------------------------------------------------------------------------
 
 oc_framework(Foundation)
 oc_import(
     Foundation,
-    function(bool,        class_addIvar,(Class, const char* name, size_t size, uint8_t alignment, const char* types)),
-    function(bool,        class_addMethod,(Class, SEL, IMP, const char* types)),
-    function(Method*,     class_copyMethodList,(Class, unsigned int *outCount)),
-    function(Property*,   class_copyPropertyList,(Class, unsigned int *outCount)),
-    function(Ivar*,       class_copyIvarList,(Class, unsigned int *outCount)),
-    function(Method,      class_getClassMethod,(Class, SEL)),
-    function(Method,      class_getInstanceMethod,(Class, SEL)),
-    function(size_t,      class_getInstanceSize,(Class)),
-    function(Ivar,        class_getInstanceVariable,(Class, const char* name)),
-    function(IMP,         class_getMethodImplementation,(Class, SEL)),
-    function(const char*, class_getName,(Class)),
-    function(Property,    class_getProperty,(Class, const char *name)),
-    function(Class,       class_getSuperclass,(Class)),
-    function(const char*, ivar_getName,(Ivar v)),
-    function(ptrdiff_t,   ivar_getOffset,(Ivar)),
-    function(SEL,         method_getName,(Method m)),
-    function(const char*, method_getTypeEncoding,(Method)),
-    function(IMP,         method_setImplementation,(Method, IMP)),
-    function(Class,       objc_allocateClassPair,(Class, const char* name, size_t extraBytes)),
-    function(void*,       objc_autorelease,(void*)),
-    function(void,        objc_autoreleasePoolPop,(void*)),
-    function(void*,       objc_autoreleasePoolPush,(void)),
-    function(void*,       objc_constructInstance,(Class, void* bytes)),
-    function(void,        objc_destructInstance,(void*)),
-    function(Class,       objc_getClass,(const char* name)),
-    function(void*,       objc_getProtocol,(const char* name)),
-    function(void*,       objc_msgSend,(id, SEL, ...)),
-    function(void,        objc_msgSend_stret,(id, SEL, ...)),
-    function(void*,       objc_msgSendSuper2,(objc_super2*, SEL, ...)),
-    function(void,        objc_msgSendSuper2_stret,(objc_super2*, SEL, ...)),
-    function(void,        objc_registerClassPair,(Class)),
-    function(void,        objc_release,(void*)),
-    function(void*,       objc_retain,(void*)),
-    function(Class,       object_getClass,(void*)),
-    function(const char*, sel_getName,(SEL)),
-    function(SEL,         sel_getUid,(const char*)),
+    function(bool,           class_addIvar,(objc_class*, const char* name, size_t size, uint8_t alignment, const char* types)),
+    function(bool,           class_addMethod,(objc_class*, objc_selector*, objc_imp, const char* types)),
+    function(objc_method**,  class_copyMethodList,(objc_class*, unsigned int *outCount)),
+    function(objc_ivar**,    class_copyIvarList,(objc_class*, unsigned int *outCount)),
+    function(objc_method*,   class_getClassMethod,(objc_class*, objc_selector*)),
+    function(objc_method*,   class_getInstanceMethod,(objc_class*, objc_selector*)),
+    function(size_t,         class_getInstanceSize,(objc_class*)),
+    function(objc_ivar*,     class_getInstanceVariable,(objc_class*, const char* name)),
+    function(objc_imp,       class_getMethodImplementation,(objc_class*, objc_selector*)),
+    function(const char*,    class_getName,(objc_class*)),
+    function(objc_class*,    class_getSuperclass,(objc_class*)),
+    function(const char*,    ivar_getName,(objc_ivar*)),
+    function(ptrdiff_t,      ivar_getOffset,(objc_ivar*)),
+    function(objc_selector*, method_getName,(objc_method* m)),
+    function(const char*,    method_getTypeEncoding,(objc_method*)),
+    function(objc_imp,       method_setImplementation,(objc_method*, objc_imp)),
+    function(objc_class*,    objc_allocateClassPair,(objc_class*, const char* name, size_t extraBytes)),
+    function(id,             objc_autorelease,(void*)),
+    function(void,           objc_autoreleasePoolPop,(void*)),
+    function(void*,          objc_autoreleasePoolPush,(void)),
+    function(void*,          objc_constructInstance,(objc_class*, void* bytes)),
+    function(void,           objc_destructInstance,(void*)),
+    function(objc_class*,    objc_getClass,(const char* name)),
+    function(void*,          objc_getProtocol,(const char* name)),
+    function(void*,          objc_msgSend,(id, objc_selector*, ...)),
+    function(void*,          objc_msgSendSuper2,(objc_super2*, objc_selector*, ...)),
+    function(void,           objc_registerClassPair,(objc_class*)),
+    function(void,           objc_release,(void*)),
+    function(id,             objc_retain,(void*)),
+    function(objc_class*,    object_getClass,(void*)),
+    function(const char*,    sel_getName,(objc_selector*)),
+    function(objc_selector*, sel_getUid,(const char*)),
 )
 
 #if defined(__x86_64__) || defined(__i386__)
 
     oc_import(
         Foundation,
-        function(long double,objc_msgSend_fpret,(id, SEL, ...)),
+        function(long double,objc_msgSend_fpret,(id, objc_selector*, ...)),
+        function(void,       objc_msgSend_stret,(id, objc_selector*, ...)),
+        function(void,       objc_msgSendSuper2_stret,(objc_super2*, objc_selector*, ...)),
     )
 
 #elif defined(__arm__)
 
+    oc_import(
+        Foundation,
+        function(void,       objc_msgSend_stret,(id, objc_selector*, ...)),
+        function(void,       objc_msgSendSuper2_stret,(objc_super2*, objc_selector*, ...)),
+    )
+
     #define objc_msgSend_fpret objc_msgSend
 
+#elif defined(__aarch64__)
+
+    #define objc_msgSend_fpret       objc_msgSend
+    #define objc_msgSend_stret       objc_msgSend
+    #define objc_msgSendSuper2_stret objc_msgSendSuper2
+
 #endif
+
+#define oc_retain(obj)      (objc_retain(obj))
+#define oc_release(obj)     (objc_release(obj))
+#define oc_autorelease(obj) (objc_autorelease(obj))
+
+/*------------------------------------------------------------------------------
+oc_autoreleasepool - scoped autorelease pool
+*/
+
+#define oc_autoreleasepool\
+    for(__attribute__((cleanup(oc_autoreleasepool_cleanup)))\
+        void* oc_autoreleasepool = objc_autoreleasePoolPush();\
+        oc_autoreleasepool;\
+        oc_autoreleasepool_cleanup(&oc_autoreleasepool))
+
+static inline void oc_autoreleasepool_cleanup(void** ppool) {
+    if (*ppool) { objc_autoreleasePoolPop(*ppool); *ppool = NULL; }
+}
 
 /*------------------------------------------------------------------------------
 oc_class(NAME) - forward declare an Objective-C class
 */
-#define oc_class(NAME) typedef struct NAME NAME;
+#define oc_class(NAME) typedef struct NAME NAME
 
-oc_class(NSObject)
+oc_class(NSObject);
 
 /*------------------------------------------------------------------------------
 oc_interface(CLASS, SYMBOLS...) - declare an Objective-C class interface
@@ -204,7 +223,7 @@ Usage:
         applicationShouldTerminate,NSApplication*
     ) {
         puts(__func__);
-        appQuit();
+        app_quit();
         return NSApplicationTerminateCancel;
     }
 
@@ -244,9 +263,9 @@ oc_super(CLASS, PARAMS...) - call an Objective-C super method
 
 Usage:
 
-    oc_method(AppWindow*,AppWindow,alloc) {
+    oc_method(app_window*,app_window,alloc) {
         puts((const char*)cmd);
-        return oc_super(AppWindow,alloc);
+        return oc_super(app_window,alloc);
     }
 
 */
@@ -297,7 +316,7 @@ Usage:
 */
 #include "detail/swizzle.h"
 #define oc_cls_swizzle(RESULT, CLASS, /*PARAMS*/...)\
-        _oc_msg_swizzle(RESULT, CLASS, Class, ClassMethod, __VA_ARGS__)
+        _oc_msg_swizzle(RESULT, CLASS, objc_class*, ClassMethod, __VA_ARGS__)
 
 #define oc_obj_swizzle(RESULT, CLASS, /*PARAMS*/...)\
         _oc_msg_swizzle(RESULT, CLASS, CLASS*, InstanceMethod, __VA_ARGS__)

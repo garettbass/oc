@@ -10,7 +10,7 @@
         _oc_extern_c_begin\
         __attribute__((constructor)) static inline void\
         _oc_implementation_initializer_##CLASS(void) {\
-            const Class super = SUPERCLASS##_class;\
+            objc_class* const super = SUPERCLASS##_class;\
             _oc_implementation_initializer(&CLASS##_class, super, #CLASS);\
             _oc_implementation_symbol_initializers(CLASS, __VA_ARGS__)\
             objc_registerClassPair(CLASS##_class);\
@@ -19,7 +19,7 @@
 
         _oc_extern_c_begin
         static inline void
-        _oc_implementation_initializer(Class* pcls, Class super, const char name[]) {
+        _oc_implementation_initializer(objc_class** pcls, objc_class* super, const char name[]) {
             assert(super);
             assert(*pcls == NULL);
             *pcls = objc_allocateClassPair(super, name, 0);
@@ -64,7 +64,7 @@
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #define __oc_implementation_symbol_declaration_cls(CLASS, RESULT, /*PARAMS*/...)\
-        _oc_method_declaration(CLASS, Class*, RESULT, __VA_ARGS__)
+        _oc_method_declaration(CLASS, objc_class**, RESULT, __VA_ARGS__)
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

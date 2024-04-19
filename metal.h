@@ -5,46 +5,46 @@
 
 oc_framework(QuartzCore)
 
-oc_class(CAMetalDrawable)
-oc_class(CAMetalLayer)
+oc_class(CAMetalDrawable);
+oc_class(CAMetalLayer);
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 oc_framework(MetalKit)
 
-oc_class(MTKView)
+oc_class(MTKView);
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 oc_framework(Metal)
 
-oc_class(MTLArray)
-oc_class(MTLBuffer)
-oc_class(MTLCommandBuffer)
-oc_class(MTLCommandQueue)
-oc_class(MTLCompileOptions)
-oc_class(MTLDepthStencilDescriptor)
-oc_class(MTLDepthStencilState)
-oc_class(MTLDevice)
-oc_class(MTLFunction)
-oc_class(MTLLibrary)
-oc_class(MTLRenderCommandEncoder)
-oc_class(MTLRenderPassAttachmentDescriptor)
-oc_class(MTLRenderPassColorAttachmentDescriptor)
-oc_class(MTLRenderPassDepthAttachmentDescriptor)
-oc_class(MTLRenderPassDescriptor)
-oc_class(MTLRenderPassStencilAttachmentDescriptor)
-oc_class(MTLRenderPipelineColorAttachmentDescriptor)
-oc_class(MTLRenderPipelineDescriptor)
-oc_class(MTLRenderPipelineState)
-oc_class(MTLSamplerDescriptor)
-oc_class(MTLSamplerState)
-oc_class(MTLStencilDescriptor)
-oc_class(MTLTexture)
-oc_class(MTLTextureDescriptor)
-oc_class(MTLVertexAttributeDescriptor)
-oc_class(MTLVertexBufferLayoutDescriptor)
-oc_class(MTLVertexDescriptor)
+oc_class(MTLArray);
+oc_class(MTLBuffer);
+oc_class(MTLCommandBuffer);
+oc_class(MTLCommandQueue);
+oc_class(MTLCompileOptions);
+oc_class(MTLDepthStencilDescriptor);
+oc_class(MTLDepthStencilState);
+oc_class(MTLDevice);
+oc_class(MTLFunction);
+oc_class(MTLLibrary);
+oc_class(MTLRenderCommandEncoder);
+oc_class(MTLRenderPassAttachmentDescriptor);
+oc_class(MTLRenderPassColorAttachmentDescriptor);
+oc_class(MTLRenderPassDepthAttachmentDescriptor);
+oc_class(MTLRenderPassDescriptor);
+oc_class(MTLRenderPassStencilAttachmentDescriptor);
+oc_class(MTLRenderPipelineColorAttachmentDescriptor);
+oc_class(MTLRenderPipelineDescriptor);
+oc_class(MTLRenderPipelineState);
+oc_class(MTLSamplerDescriptor);
+oc_class(MTLSamplerState);
+oc_class(MTLStencilDescriptor);
+oc_class(MTLTexture);
+oc_class(MTLTextureDescriptor);
+oc_class(MTLVertexAttributeDescriptor);
+oc_class(MTLVertexBufferLayoutDescriptor);
+oc_class(MTLVertexDescriptor);
 
 oc_import(Metal, function(MTLDevice*,MTLCreateSystemDefaultDevice,(void)))
 
@@ -859,6 +859,9 @@ oc_interface(
     obj(void,
         setVertexTexture,MTLTexture*,
         atIndex,NSUInteger),
+    obj(void,
+        setVertexSamplerState,MTLSamplerState*, 
+        atIndex,NSUInteger),
 
     obj(void,
         setFragmentBuffer,MTLBuffer*,
@@ -866,6 +869,9 @@ oc_interface(
         atIndex,NSUInteger),
     obj(void,
         setFragmentTexture,MTLTexture*,
+        atIndex,NSUInteger),
+    obj(void,
+        setFragmentSamplerState,MTLSamplerState*, 
         atIndex,NSUInteger),
 )
 
